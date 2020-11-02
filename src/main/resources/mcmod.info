@@ -1,0 +1,16 @@
+[
+  {
+	"modid" : "lotr",
+	"name" : "The Lord of the Rings Mod",
+	"version" : "Update 36.6",
+	"credits" : "See credits.txt for full credits",
+	"authorList": ["Mevans"],
+	"description": "See ingame mod list!",
+	"logoFile" : "assets/lotr/logo.png",
+	"url" : "lotrminecraftmod.wikia.com",
+	"updateUrl" : "",
+	"parent" : "",
+	"dependencies": [],
+	"screenshots": []
+  }
+]

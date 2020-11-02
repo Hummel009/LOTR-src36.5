@@ -1,0 +1,113 @@
+package lotr.common.world.structure2;
+
+import java.util.Random;
+
+import lotr.common.LOTRMod;
+import lotr.common.entity.npc.*;
+import lotr.common.item.LOTRItemBanner;
+import lotr.common.world.structure.LOTRChestContents;
+import net.minecraft.init.Blocks;
+import net.minecraft.world.World;
+
+public class LOTRWorldGenRuinedDwarvenTower extends LOTRWorldGenDwarvenTower {
+	private boolean isGundabad;
+
+	public LOTRWorldGenRuinedDwarvenTower(boolean flag) {
+		super(flag);
+		ruined = true;
+		glowBrickBlock = brickBlock;
+		glowBrickMeta = brickMeta;
+	}
+
+	@Override
+	protected LOTREntityNPC getCommanderNPC(World world) {
+		if (isGundabad) {
+			return new LOTREntityGundabadOrcMercenaryCaptain(world);
+		}
+		return null;
+	}
+
+	@Override
+	protected void setupRandomBlocks(Random random) {
+		super.setupRandomBlocks(random);
+		if (random.nextInt(3) == 0) {
+			plankBlock = LOTRMod.planks;
+			plankMeta = 3;
+			plankSlabBlock = LOTRMod.woodSlabSingle;
+			plankSlabMeta = 3;
+		}
+		if (random.nextInt(4) == 0) {
+			barsBlock = Blocks.air;
+		} else {
+			int randomBars = random.nextInt(4);
+			if (randomBars == 0) {
+				barsBlock = LOTRMod.dwarfBars;
+			} else if (randomBars == 1) {
+				barsBlock = LOTRMod.orcSteelBars;
+			} else if (randomBars == 2) {
+				barsBlock = Blocks.iron_bars;
+			} else if (randomBars == 3) {
+				barsBlock = LOTRMod.bronzeBars;
+			}
+		}
+		isGundabad = random.nextInt(3) == 0;
+		if (isGundabad) {
+			gateBlock = LOTRMod.gateOrc;
+			tableBlock = LOTRMod.gundabadTable;
+			forgeBlock = LOTRMod.orcForge;
+			bannerType = LOTRItemBanner.BannerType.GUNDABAD;
+			chestContents = LOTRChestContents.GUNDABAD_TENT;
+		} else {
+			gateBlock = LOTRMod.gateDwarven;
+			tableBlock = LOTRMod.dwarvenTable;
+			forgeBlock = LOTRMod.dwarvenForge;
+			bannerType = null;
+			chestContents = LOTRChestContents.DWARVEN_TOWER;
+		}
+	}
+
+	@Override
+	protected void placeBrick(World world, Random random, int i, int j, int k) {
+		if (random.nextInt(4) == 0) {
+			setBlockAndMetadata(world, i, j, k, LOTRMod.brick4, 5);
+		} else {
+			super.placeBrick(world, random, i, j, k);
+		}
+	}
+
+	@Override
+	protected void placeBrickSlab(World world, Random random, int i, int j, int k, boolean flip) {
+		if (random.nextInt(4) == 0) {
+			setBlockAndMetadata(world, i, j, k, LOTRMod.slabSingle7, 6 | (flip ? 8 : 0));
+		} else {
+			super.placeBrickSlab(world, random, i, j, k, flip);
+		}
+	}
+
+	@Override
+	protected void placeBrickStair(World world, Random random, int i, int j, int k, int meta) {
+		if (random.nextInt(4) == 0) {
+			setBlockAndMetadata(world, i, j, k, LOTRMod.stairsDwarvenBrickCracked, meta);
+		} else {
+			super.placeBrickStair(world, random, i, j, k, meta);
+		}
+	}
+
+	@Override
+	protected void placeBrickWall(World world, Random random, int i, int j, int k) {
+		if (random.nextInt(4) == 0) {
+			setBlockAndMetadata(world, i, j, k, LOTRMod.wall4, 5);
+		} else {
+			super.placeBrickWall(world, random, i, j, k);
+		}
+	}
+
+	@Override
+	protected void placePillar(World world, Random random, int i, int j, int k) {
+		if (random.nextInt(4) == 0) {
+			setBlockAndMetadata(world, i, j, k, LOTRMod.pillar2, 0);
+		} else {
+			super.placePillar(world, random, i, j, k);
+		}
+	}
+}

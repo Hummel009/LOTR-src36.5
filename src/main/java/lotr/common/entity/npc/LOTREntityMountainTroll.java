@@ -1,0 +1,165 @@
+package lotr.common.entity.npc;
+
+import cpw.mods.fml.relauncher.*;
+import lotr.common.*;
+import lotr.common.entity.ai.*;
+import lotr.common.entity.projectile.LOTREntityThrownRock;
+import net.minecraft.entity.*;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.ai.attributes.*;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.item.ItemStack;
+import net.minecraft.world.World;
+
+public class LOTREntityMountainTroll extends LOTREntityTroll {
+	public static IAttribute thrownRockDamage = new RangedAttribute("lotr.thrownRockDamage", 5.0, 0.0, 100.0).setDescription("LOTR Thrown Rock Damage");
+	private EntityAIBase rangedAttackAI = getTrollRangedAttackAI();
+	private EntityAIBase meleeAttackAI;
+
+	public LOTREntityMountainTroll(World world) {
+		super(world);
+	}
+
+	@Override
+	public float getTrollScale() {
+		return 1.6f;
+	}
+
+	@Override
+	public EntityAIBase getTrollAttackAI() {
+		meleeAttackAI = new LOTREntityAIAttackOnCollide(this, 1.8, false);
+		return meleeAttackAI;
+	}
+
+	protected EntityAIBase getTrollRangedAttackAI() {
+		return new LOTREntityAIRangedAttack(this, 1.2, 30, 60, 24.0f);
+	}
+
+	@Override
+	public void entityInit() {
+		super.entityInit();
+		dataWatcher.addObject(21, (byte) 0);
+	}
+
+	public boolean isThrowingRocks() {
+		return dataWatcher.getWatchableObjectByte(21) == 1;
+	}
+
+	public void setThrowingRocks(boolean flag) {
+		dataWatcher.updateObject(21, flag ? (byte) 1 : 0);
+	}
+
+	@Override
+	protected void applyEntityAttributes() {
+		super.applyEntityAttributes();
+		getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(70.0);
+		getEntityAttribute(npcAttackDamage).setBaseValue(7.0);
+		getAttributeMap().registerAttribute(thrownRockDamage);
+	}
+
+	@Override
+	protected boolean hasTrollName() {
+		return false;
+	}
+
+	@Override
+	protected boolean canTrollBeTickled(EntityPlayer entityplayer) {
+		return false;
+	}
+
+	@Override
+	public double getMeleeRange() {
+		return 12.0;
+	}
+
+	@Override
+	public void onAttackModeChange(LOTREntityNPC.AttackMode mode, boolean mounted) {
+		if (mode == LOTREntityNPC.AttackMode.IDLE) {
+			tasks.removeTask(meleeAttackAI);
+			tasks.removeTask(rangedAttackAI);
+			setThrowingRocks(false);
+		}
+		if (mode == LOTREntityNPC.AttackMode.MELEE) {
+			tasks.removeTask(meleeAttackAI);
+			tasks.removeTask(rangedAttackAI);
+			tasks.addTask(3, meleeAttackAI);
+			setThrowingRocks(false);
+		}
+		if (mode == LOTREntityNPC.AttackMode.RANGED) {
+			tasks.removeTask(meleeAttackAI);
+			tasks.removeTask(rangedAttackAI);
+			tasks.addTask(3, rangedAttackAI);
+			setThrowingRocks(true);
+		}
+	}
+
+	@Override
+	public void attackEntityWithRangedAttack(EntityLivingBase target, float f) {
+		EntityArrow template = new EntityArrow(worldObj, this, target, f * 1.5f, 0.5f);
+		LOTREntityThrownRock rock = getThrownRock();
+		rock.setLocationAndAngles(template.posX, template.posY, template.posZ, template.rotationYaw, template.rotationPitch);
+		rock.motionX = template.motionX;
+		rock.motionY = template.motionY + 0.6;
+		rock.motionZ = template.motionZ;
+		worldObj.spawnEntityInWorld(rock);
+		playSound(getLivingSound(), getSoundVolume(), getSoundPitch() * 0.75f);
+		swingItem();
+	}
+
+	protected LOTREntityThrownRock getThrownRock() {
+		LOTREntityThrownRock rock = new LOTREntityThrownRock(worldObj, this);
+		rock.setDamage((float) getEntityAttribute(thrownRockDamage).getAttributeValue());
+		return rock;
+	}
+
+	@Override
+	public void onTrollDeathBySun() {
+		worldObj.playSoundAtEntity(this, "lotr:troll.transform", getSoundVolume(), getSoundPitch());
+		worldObj.setEntityState(this, (byte) 15);
+		setDead();
+	}
+
+	@SideOnly(value = Side.CLIENT)
+	@Override
+	public void handleHealthUpdate(byte b) {
+		if (b == 15) {
+			super.handleHealthUpdate(b);
+			for (int l = 0; l < 64; ++l) {
+				LOTRMod.proxy.spawnParticle("largeStone", posX + rand.nextGaussian() * width * 0.5, posY + rand.nextDouble() * height, posZ + rand.nextGaussian() * width * 0.5, 0.0, 0.0, 0.0);
+			}
+		} else {
+			super.handleHealthUpdate(b);
+		}
+	}
+
+	@Override
+	public void dropFewItems(boolean flag, int i) {
+		super.dropFewItems(flag, i);
+		int totemChance = 15 - i * 3;
+		totemChance = Math.max(totemChance, 1);
+		if (rand.nextInt(totemChance) == 0) {
+			entityDropItem(new ItemStack(LOTRMod.trollTotem, 1, rand.nextInt(3)), 0.0f);
+		}
+	}
+
+	@Override
+	protected LOTRAchievement getKillAchievement() {
+		return LOTRAchievement.killMountainTroll;
+	}
+
+	@Override
+	public float getAlignmentBonus() {
+		return 4.0f;
+	}
+
+	@Override
+	protected int getExperiencePoints(EntityPlayer entityplayer) {
+		return 7 + rand.nextInt(6);
+	}
+
+	@Override
+	public String getSpeechBank(EntityPlayer entityplayer) {
+		return null;
+	}
+}
