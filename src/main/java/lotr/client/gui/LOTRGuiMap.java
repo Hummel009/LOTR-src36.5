@@ -1486,12 +1486,14 @@ public class LOTRGuiMap extends LOTRGuiMenuBase {
 		}
 		if (wpZoomlerp > 0.0f) {
 			for (LOTRAbstractWaypoint waypoint : waypoints) {
-				double distToWP;
 				double dy;
 				double dx;
-				boolean unlocked = mc.thePlayer != null && mc.thePlayer.worldObj != null && waypoint.hasPlayerUnlocked(mc.thePlayer);
+				boolean shared;
+				double distToWP;
+				boolean unlocked = mc.thePlayer != null && waypoint.hasPlayerUnlocked(mc.thePlayer);
 				boolean hidden = waypoint.isHidden();
-				((LOTRCustomWaypoint) waypoint).isShared();
+				boolean custom = waypoint instanceof LOTRCustomWaypoint;
+				shared = waypoint instanceof LOTRCustomWaypoint && ((LOTRCustomWaypoint) waypoint).isShared();
 				if (!isWaypointVisible(waypoint) && !overrideToggles || hidden && !unlocked) {
 					continue;
 				}
@@ -1499,7 +1501,7 @@ public class LOTRGuiMap extends LOTRGuiMenuBase {
 				float x = pos[0];
 				float y = pos[1];
 				int clip = 200;
-				if ((x < mapXMin - clip) || (x > mapXMax + clip) || (y < mapYMin - clip) || (y > mapYMax + clip)) {
+				if (x < mapXMin - clip || x > mapXMax + clip || y < mapYMin - clip || y > mapYMax + clip) {
 					continue;
 				}
 				if (pass == 0) {
@@ -1514,10 +1516,9 @@ public class LOTRGuiMap extends LOTRGuiMenuBase {
 						this.drawTexturedModalRectFloat(x / 0.33f - 8.0f, y / 0.33f - 8.0f, 0, 0, 15.0f, 15.0f);
 						GL11.glPopMatrix();
 					} else {
-						LOTRAbstractWaypoint.WaypointLockState state = mc.thePlayer != null ? waypoint.getLockState(mc.thePlayer) : LOTRAbstractWaypoint.WaypointLockState.STANDARD_UNLOCKED;
 						mc.getTextureManager().bindTexture(mapIconsTexture);
 						GL11.glColor4f(1.0f, 1.0f, 1.0f, wpAlpha);
-						this.drawTexturedModalRectFloat(x - 2.0f, y - 2.0f, state.iconU, state.iconV, 4.0f, 4.0f);
+						this.drawTexturedModalRectFloat(x - 2.0f, y - 2.0f, 0 + (unlocked ? 4 : 0), 200 + (shared ? 8 : custom ? 4 : 0), 4.0f, 4.0f);
 					}
 					GL11.glDisable(3042);
 					if (labels) {
@@ -1542,7 +1543,7 @@ public class LOTRGuiMap extends LOTRGuiMenuBase {
 						}
 					}
 				}
-				if (pass != 1 || waypoint == selectedWaypoint || (x < mapXMin - 2) || (x > mapXMax + 2) || (y < mapYMin - 2) || (y > mapYMax + 2) || ((distToWP = Math.sqrt((dx = x - mouseX) * dx + (dy = y - mouseY) * dy)) > 5.0) || (distToWP > distanceMouseOverWP)) {
+				if (pass != 1 || waypoint == selectedWaypoint || x < mapXMin - 2 || x > mapXMax + 2 || y < mapYMin - 2 || y > mapYMax + 2 || (distToWP = Math.sqrt((dx = x - mouseX) * dx + (dy = y - mouseY) * dy)) > 5.0 || distToWP > distanceMouseOverWP) {
 					continue;
 				}
 				mouseOverWP = waypoint;
