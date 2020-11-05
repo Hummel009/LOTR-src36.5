@@ -36,7 +36,7 @@ public class LOTRGenLayerBeach extends LOTRGenLayer {
 							newBiomeID = nextInt(3) == 0 ? LOTRBiome.lindonCoast.biomeID : LOTRBiome.beachWhite.biomeID;
 						} else if (biome instanceof LOTRBiomeGenForodwaith) {
 							newBiomeID = LOTRBiome.forodwaithCoast.biomeID;
-						} else if (biome instanceof LOTRBiomeGenFarHaradCoast || biome instanceof LOTRBiomeGenFarHaradVolcano) {
+						} else if ((biome instanceof LOTRBiomeGenFarHaradCoast) || (biome instanceof LOTRBiomeGenFarHaradVolcano)) {
 							newBiomeID = biomeID;
 						} else if (!(biome instanceof LOTRBiomeGenBeach)) {
 							newBiomeID = biome.decorator.whiteSand ? LOTRBiome.beachWhite.biomeID : nextInt(20) == 0 ? LOTRBiome.beachGravel.biomeID : LOTRBiome.beach.biomeID;

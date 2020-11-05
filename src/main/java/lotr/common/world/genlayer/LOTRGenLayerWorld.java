@@ -7,9 +7,11 @@ import java.util.zip.*;
 
 import javax.imageio.ImageIO;
 
+import org.apache.logging.log4j.Level;
+
 import com.google.common.math.IntMath;
 
-import cpw.mods.fml.common.ModContainer;
+import cpw.mods.fml.common.*;
 import lotr.common.*;
 import lotr.common.world.biome.LOTRBiome;
 import net.minecraft.world.*;
